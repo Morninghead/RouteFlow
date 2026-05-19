@@ -67,11 +67,12 @@ export class SupabaseAdapter implements StorageAdapter {
   };
 
   users = {
-    list: async (schoolId: string): Promise<User[]> => {
-      const { data, error } = await this.supabase
-        .from('users')
-        .select('*')
-        .eq('school_id', schoolId);
+    list: async (schoolId?: string): Promise<User[]> => {
+      let query = this.supabase.from('users').select('*');
+      if (schoolId) {
+        query = query.eq('school_id', schoolId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data.map(this.mapUser);
     },
@@ -91,6 +92,16 @@ export class SupabaseAdapter implements StorageAdapter {
         .from('users')
         .select('*')
         .eq('firebase_uid', firebaseUid)
+        .single();
+      if (error) return null;
+      return this.mapUser(data);
+    },
+
+    getByLineUserId: async (lineUserId: string): Promise<User | null> => {
+      const { data, error } = await this.supabase
+        .from('users')
+        .select('*')
+        .eq('line_user_id', lineUserId)
         .single();
       if (error) return null;
       return this.mapUser(data);
@@ -585,24 +596,34 @@ export class SupabaseAdapter implements StorageAdapter {
     role: row.role,
     email: row.email,
     phoneNumber: row.phone_number,
+    lineUserId: row.line_user_id,
+    displayName: row.display_name,
+    pictureUrl: row.picture_url,
     title: row.title,
     firstName: row.first_name,
     lastName: row.last_name,
+    status: row.status || 'active',
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     lastVerifiedAt: row.last_verified_at ? new Date(row.last_verified_at) : undefined,
+    lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : undefined,
   });
 
   private unmapUser = (input: any): any => ({
     school_id: input.schoolId,
     firebase_uid: input.firebaseUid,
+    line_user_id: input.lineUserId,
     role: input.role,
     email: input.email,
     phone_number: input.phoneNumber,
+    display_name: input.displayName,
+    picture_url: input.pictureUrl,
     title: input.title,
     first_name: input.firstName,
     last_name: input.lastName,
+    status: input.status,
     last_verified_at: input.lastVerifiedAt?.toISOString(),
+    last_login_at: input.lastLoginAt?.toISOString(),
   });
 
   private mapVehicle = (row: any): Vehicle => ({

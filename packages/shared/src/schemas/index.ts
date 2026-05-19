@@ -14,16 +14,21 @@ export const locationSchema = z.object({
 
 export const userSchema = z.object({
   id: z.string().uuid(),
-  schoolId: z.string().uuid(),
+  schoolId: z.string().uuid().optional(),
   role: roleSchema,
   email: z.string().email().optional(),
-  phoneNumber: z.string().min(10),
+  phoneNumber: z.string().min(10).optional(),
+  lineUserId: z.string().optional(),
+  displayName: z.string().optional(),
+  pictureUrl: z.string().url().optional(),
   title: titleTHSchema.optional(),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  status: z.enum(['active', 'inactive', 'pending']),
   createdAt: z.date(),
   updatedAt: z.date(),
   lastVerifiedAt: z.date().optional(),
+  lastLoginAt: z.date().optional(),
 });
 
 export const schoolConfigSchema = z.object({

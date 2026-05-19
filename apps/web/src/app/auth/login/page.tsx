@@ -1,53 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Bus } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    }
+  }, []);
+
+  const handleLineLogin = () => {
     setLoading(true);
     setError('');
 
-    try {
-      // TODO: Implement Firebase Phone Auth
-      // For now, simulate OTP send
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setStep('otp');
-    } catch (err) {
-      // Use generic error message for security
-      setError('Failed to send verification code. Please try again.');
-      console.error('OTP send error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      // TODO: Implement Firebase OTP verification
-      // For now, simulate verification
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push('/dashboard');
-    } catch (err) {
-      // Use generic error message for security
-      setError('Invalid verification code. Please try again.');
-      console.error('OTP verification error:', err);
-    } finally {
-      setLoading(false);
-    }
+    fetch('/api/auth/line?action=url')
+      .then(res => res.json())
+      .then(data => {
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          setError('Failed to initialize login. Please try again.');
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        setError('Failed to connect to login service. Please try again.');
+        setLoading(false);
+      });
   };
 
   return (
@@ -57,91 +42,44 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Bus className="w-16 h-16 text-amber-500" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">School Bus Router</h1>
-          <p className="text-gray-600">Sign in to continue</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">RouteFlow</h1>
+          <p className="text-gray-600">Fleet & Route Management Platform</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-8">
-          {step === 'phone' ? (
-            <form onSubmit={handleSendOTP}>
-              <div className="mb-6">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+66812345678"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  required
-                />
-                <p className="mt-2 text-sm text-gray-500">
-                  Enter your phone number with country code
-                </p>
-              </div>
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-500 text-sm">
+              Sign in to manage your fleet and routes
+            </p>
+          </div>
 
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sending...' : 'Send OTP'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOTP}>
-              <div className="mb-6">
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                  Verification Code
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  maxLength={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-center text-2xl tracking-widest"
-                  required
-                />
-                <p className="mt-2 text-sm text-gray-500">
-                  Enter the 6-digit code sent to {phoneNumber}
-                </p>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:cursor-not-allowed mb-3"
-              >
-                {loading ? 'Verifying...' : 'Verify & Sign In'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep('phone')}
-                className="w-full text-amber-600 py-2 text-sm hover:underline"
-              >
-                Change phone number
-              </button>
-            </form>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
           )}
 
-          <div id="recaptcha-container" className="mt-4"></div>
+          <button
+            onClick={handleLineLogin}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 bg-[#06C755] text-white py-3.5 rounded-lg font-semibold hover:bg-[#05a347] transition disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+          >
+            {loading ? (
+              <span>Connecting...</span>
+            ) : (
+              <>
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 0-.27.12-.27.27v5.46c0 .15.12.27.27.27h.8c.15 0 .27-.12.27-.27V9.07c0-.15-.12-.27-.27-.27h-.8zm-2.13 0c-.15 0-.27.12-.27.27v5.46c0 .15.12.27.27.27h.8c.15 0 .27-.12.27-.27V9.07c0-.15-.12-.27-.27-.27h-.8zm-2.14 0c-.15 0-.27.12-.27.27v5.46c0 .15.12.27.27.27h.8c.15 0 .27-.12.27-.27V9.07c0-.15-.12-.27-.27-.27h-.8zm-2.13 0c-.15 0-.27.12-.27.27v5.46c0 .15.12.27.27.27h.8c.15 0 .27-.12.27-.27V9.07c0-.15-.12-.27-.27-.27h-.8z"/>
+                </svg>
+                <span>Log in with LINE</span>
+              </>
+            )}
+          </button>
+
+          <p className="text-xs text-gray-400 text-center mt-4">
+            Secure login powered by LINE. No password needed.
+          </p>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-6">

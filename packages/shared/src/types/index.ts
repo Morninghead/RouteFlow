@@ -6,16 +6,21 @@ export type TitleTH = 'นาย' | 'นาง' | 'นางสาว' | 'ด.�
 
 export interface User {
   id: string;
-  schoolId: string;
+  schoolId?: string;
   role: Role;
   email?: string;
-  phoneNumber: string;
+  phoneNumber?: string;
+  lineUserId?: string;
+  displayName?: string;
+  pictureUrl?: string;
   title?: TitleTH;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
+  status: 'active' | 'inactive' | 'pending';
   createdAt: Date;
   updatedAt: Date;
   lastVerifiedAt?: Date;
+  lastLoginAt?: Date;
 }
 
 export interface School {
