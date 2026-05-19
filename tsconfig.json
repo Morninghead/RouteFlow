@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./apps/web/src/*"],
+      "@repo/ui": ["./packages/ui/src/index.ts"],
+      "@repo/storage": ["./packages/storage/src/index.ts"],
+      "@repo/routing": ["./packages/routing/src/index.ts"],
+      "@repo/notifier": ["./packages/notifier/src/index.ts"],
+      "@repo/auth": ["./packages/auth/src/index.ts"],
+      "@repo/shared": ["./packages/shared/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", ".next", "dist", "build"]
+}
