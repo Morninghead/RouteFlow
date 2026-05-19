@@ -134,3 +134,12 @@ sentry.properties
 *.bak
 *.backup
 *~
+
+# Internal development documents
+DEEP_SECURITY_AUDIT.md
+PRE_COMMIT_VERIFICATION.md
+PROJECT_STATUS.md
+SECURITY_FIXES.md
+
+DEPLOYMENT.md
+
