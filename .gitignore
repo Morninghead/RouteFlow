@@ -147,3 +147,4 @@ SECURITY_FIXES.md
 
 DEPLOYMENT.md
 
+.env*.local
