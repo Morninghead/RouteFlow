@@ -1,9 +1,9 @@
 {
-  "buildCommand": "cd apps/web && npm run build",
+  "buildCommand": "cd apps/web && pnpm build",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "devCommand": "cd apps/web && npm run dev",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "devCommand": "cd apps/web && pnpm dev",
   "regions": ["sin1"],
   "headers": [
     {
