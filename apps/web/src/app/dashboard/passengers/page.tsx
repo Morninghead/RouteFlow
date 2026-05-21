@@ -9,6 +9,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { MapPicker } from '@/components/ui/map-picker';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Passenger {
   id: string;
@@ -35,7 +36,8 @@ export default function PassengersPage() {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
 
-  const schoolId = process.env.NEXT_PUBLIC_SCHOOL_ID;
+  const { user } = useAuth();
+  const schoolId = user?.schoolId;
 
   useEffect(() => { fetchPassengers(); }, []);
 

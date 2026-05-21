@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
         displayName: user.display_name,
         pictureUrl: user.picture_url,
         status: user.status,
+        schoolId: user.school_id,
       },
     });
   } catch (error) {

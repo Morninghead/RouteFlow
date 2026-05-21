@@ -5,6 +5,7 @@ import { Plus, Trash2, Route, MapPin, Loader2, Wand2, ChevronDown, ChevronUp, Bu
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RouteData {
   id: string;
@@ -30,7 +31,8 @@ export default function RoutesPage() {
   const [expandedRoute, setExpandedRoute] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const schoolId = process.env.NEXT_PUBLIC_SCHOOL_ID;
+  const { user } = useAuth();
+  const schoolId = user?.schoolId;
 
   useEffect(() => { fetchRoutes(); }, []);
 
