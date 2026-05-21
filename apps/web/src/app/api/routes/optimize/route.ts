@@ -153,7 +153,7 @@ export async function POST() {
         totalVehicles: inserts.length,
         unassignedPassengers: passengers.length - totalAssigned,
       },
-      routes: (savedRoutes ?? []).map((saved: any, i: number) => ({
+      routes: (savedRoutes ?? []).map((saved: any) => ({
         ...saved,
         vehicleName: vehicles.find((v: any) => v.id === saved.vehicle_id)?.name,
         stopCount: saved.stops?.length ?? 0,

@@ -51,17 +51,13 @@ export default function RoutesPage() {
   }
 
   async function handleAutoGenerate() {
-    if (!schoolId) { setError('กรุณาตั้งค่า NEXT_PUBLIC_SCHOOL_ID'); return; }
+    if (!schoolId) { setError('บัญชีของคุณยังไม่ได้ผูกกับโรงเรียน กรุณาติดต่อผู้ดูแลระบบ'); return; }
     if (!confirm('ระบบจะสร้าง Route ใหม่โดยอัตโนมัติ และลบ Route เก่าที่สร้างโดยระบบ ดำเนินการต่อ?')) return;
     setOptimizing(true);
     setError('');
     setResult(null);
     try {
-      const res = await fetch('/api/routes/optimize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ school_id: schoolId }),
-      });
+      const res = await fetch('/api/routes/optimize', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'เกิดข้อผิดพลาด'); }
       else { setResult(data); fetchRoutes(); }
