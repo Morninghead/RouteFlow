@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { createAdminClient } from '@/lib/supabase-server';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
-const supabaseAuth = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+function createAnonClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 const STAFF_ROLES = ['superadmin', 'admin', 'staff'];
 
@@ -24,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Authenticate via Supabase Auth
-    const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
+    const { data: authData, error: authError } = await createAnonClient().auth.signInWithPassword({
       email,
       password,
     });
@@ -33,8 +31,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
+    const db = createAdminClient();
+
     // Look up user in our users table by email
-    const { data: user, error: userError } = await supabaseAdmin
+    const { data: user, error: userError } = await db
       .from('users')
       .select('id, role, status, display_name, picture_url, email')
       .eq('email', email)
@@ -57,14 +57,13 @@ export async function POST(request: NextRequest) {
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    await supabaseAdmin.from('sessions').insert({
+    await db.from('sessions').insert({
       token: sessionToken,
       user_id: user.id,
       expires_at: expiresAt.toISOString(),
     });
 
-    // Update last_login_at
-    await supabaseAdmin
+    await db
       .from('users')
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', user.id);

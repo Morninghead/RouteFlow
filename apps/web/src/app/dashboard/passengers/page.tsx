@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { MapPicker } from '@/components/ui/map-picker';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -36,10 +37,14 @@ export default function PassengersPage() {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
 
-  const { user } = useAuth();
-  const schoolId = user?.schoolId;
+  const { user, loading: authLoading } = useAuth();
+  const schoolId = user?.schoolId ?? null;
 
-  useEffect(() => { fetchPassengers(); }, []);
+  // Wait for auth to settle before fetching — prevents race condition
+  useEffect(() => {
+    if (authLoading) return;
+    fetchPassengers();
+  }, [authLoading, schoolId]);
 
   async function fetchPassengers() {
     setLoading(true);
@@ -101,7 +106,7 @@ export default function PassengersPage() {
 
       <div className="bg-white rounded-lg shadow-sm border">
         {loading ? (
-          <div className="flex justify-center items-center py-16"><Loader2 className="animate-spin w-6 h-6 text-amber-500" /></div>
+          <table className="w-full"><tbody><TableSkeleton rows={5} cols={6} /></tbody></table>
         ) : (
           <Table>
             <TableHeader>

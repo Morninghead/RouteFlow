@@ -20,10 +20,14 @@ export function useAuth(): AuthState {
   const [state, setState] = useState<AuthState>({ user: null, loading: true });
 
   useEffect(() => {
-    fetch('/api/auth/session')
+    const controller = new AbortController();
+    fetch('/api/auth/session', { signal: controller.signal })
       .then(r => r.json())
-      .then(data => setState({ user: data.user || null, loading: false }))
-      .catch(() => setState({ user: null, loading: false }));
+      .then(data => setState({ user: data.user ?? null, loading: false }))
+      .catch(err => {
+        if (err.name !== 'AbortError') setState({ user: null, loading: false });
+      });
+    return () => controller.abort();
   }, []);
 
   return state;

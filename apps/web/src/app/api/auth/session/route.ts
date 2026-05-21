@@ -5,12 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+import { createAdminClient } from '@/lib/supabase-server';
 
 /**
  * GET /api/auth/session
@@ -20,28 +15,24 @@ export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get('session')?.value;
+    if (!sessionToken) return NextResponse.json({ user: null });
 
-    if (!sessionToken) {
-      return NextResponse.json({ user: null });
-    }
+    const db = createAdminClient();
 
-    // Validate session
-    const { data: session } = await supabaseAdmin
+    const { data: session } = await db
       .from('sessions')
       .select('user_id, expires_at')
       .eq('token', sessionToken)
       .single();
 
     if (!session || new Date(session.expires_at) < new Date()) {
-      // Clear expired session
       cookieStore.delete('session');
       return NextResponse.json({ user: null });
     }
 
-    // Get user data
-    const { data: user } = await supabaseAdmin
+    const { data: user } = await db
       .from('users')
-      .select('*')
+      .select('id, role, status, display_name, picture_url, school_id')
       .eq('id', session.user_id)
       .single();
 
@@ -73,13 +64,9 @@ export async function GET(request: NextRequest) {
 export async function DELETE() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
-
   if (sessionToken) {
-    // Remove from database
-    await supabaseAdmin.from('sessions').delete().eq('token', sessionToken);
-    // Clear cookie
+    await createAdminClient().from('sessions').delete().eq('token', sessionToken);
     cookieStore.delete('session');
   }
-
   return NextResponse.json({ success: true });
 }

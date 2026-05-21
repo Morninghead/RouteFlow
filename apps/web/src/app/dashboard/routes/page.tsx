@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { TableSkeleton } from '@/components/ui/skeleton';
 
 interface RouteData {
   id: string;
@@ -31,10 +32,14 @@ export default function RoutesPage() {
   const [expandedRoute, setExpandedRoute] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const { user } = useAuth();
-  const schoolId = user?.schoolId;
+  const { user, loading: authLoading } = useAuth();
+  const schoolId = user?.schoolId ?? null;
 
-  useEffect(() => { fetchRoutes(); }, []);
+  // Wait for auth to settle before fetching — prevents race condition
+  useEffect(() => {
+    if (authLoading) return;
+    fetchRoutes();
+  }, [authLoading, schoolId]);
 
   async function fetchRoutes() {
     setLoading(true);
@@ -134,7 +139,7 @@ export default function RoutesPage() {
 
       <div className="bg-white rounded-lg shadow-sm border">
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin w-6 h-6 text-amber-500" /></div>
+          <table className="w-full"><tbody><TableSkeleton rows={5} cols={6} /></tbody></table>
         ) : (
           <Table>
             <TableHeader>

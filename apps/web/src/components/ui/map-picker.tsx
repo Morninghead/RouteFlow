@@ -8,6 +8,13 @@ interface MapPickerProps {
   lng?: number;
   onChange: (lat: number, lng: number, address: string) => void;
   height?: string;
+  /** ISO 3166-1 alpha-2 country code to restrict search (e.g. 'th'). Omit for global. */
+  countryCode?: string;
+  /** Default map center when no lat/lng provided. Defaults to world center. */
+  defaultLat?: number;
+  defaultLng?: number;
+  /** Placeholder text for search input */
+  searchPlaceholder?: string;
 }
 
 declare global {
@@ -17,14 +24,21 @@ declare global {
   }
 }
 
-export function MapPicker({ lat, lng, onChange, height = '300px' }: MapPickerProps) {
+export function MapPicker({
+  lat, lng, onChange, height = '300px',
+  countryCode,
+  defaultLat = 20, defaultLng = 0,
+  searchPlaceholder = 'Search address...',
+}: MapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
+  const searchInputId = useRef(`map-search-${Math.random().toString(36).slice(2)}`);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
 
-  const defaultCenter = { lat: lat || 13.7563, lng: lng || 100.5018 };
+  const hasInitialPin = lat !== undefined && lng !== undefined;
+  const center = { lat: lat ?? defaultLat, lng: lng ?? defaultLng };
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -62,18 +76,17 @@ export function MapPicker({ lat, lng, onChange, height = '300px' }: MapPickerPro
     if (!loaded || !mapRef.current) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
-      center: defaultCenter,
-      zoom: 14,
+      center,
+      zoom: hasInitialPin ? 14 : 2,
       mapTypeControl: false,
       streetViewControl: false,
     });
     mapInstanceRef.current = map;
 
     const marker = new window.google.maps.Marker({
-      position: defaultCenter,
-      map,
+      position: hasInitialPin ? center : undefined,
+      map: hasInitialPin ? map : undefined,
       draggable: true,
-      title: 'ลากเพื่อเลือกตำแหน่ง',
     });
     markerRef.current = marker;
 
@@ -97,17 +110,18 @@ export function MapPicker({ lat, lng, onChange, height = '300px' }: MapPickerPro
 
     map.addListener('click', (e: google.maps.MapMouseEvent) => {
       if (e.latLng) {
+        marker.setMap(map);
         marker.setPosition(e.latLng);
         handlePosition(e.latLng);
       }
     });
 
     // Setup Places Autocomplete search box
-    const input = document.getElementById('map-search-input') as HTMLInputElement;
+    const input = document.getElementById(searchInputId.current) as HTMLInputElement;
     if (input) {
-      const autocomplete = new window.google.maps.places.Autocomplete(input, {
-        componentRestrictions: { country: 'th' },
-      });
+      const opts: any = {};
+      if (countryCode) opts.componentRestrictions = { country: countryCode };
+      const autocomplete = new window.google.maps.places.Autocomplete(input, opts);
       autocomplete.bindTo('bounds', map);
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
@@ -142,9 +156,9 @@ export function MapPicker({ lat, lng, onChange, height = '300px' }: MapPickerPro
   return (
     <div className="space-y-2">
       <input
-        id="map-search-input"
+        id={searchInputId.current}
         type="text"
-        placeholder="ค้นหาที่อยู่..."
+        placeholder={searchPlaceholder}
         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
       />
       <div ref={mapRef} style={{ height, width: '100%' }} className="rounded-lg border border-gray-200" />
