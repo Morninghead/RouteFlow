@@ -19,7 +19,8 @@ interface MapPickerProps {
 
 declare global {
   interface Window {
-    google: typeof google;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    google: any;
     initMapPicker?: () => void;
   }
 }
@@ -31,8 +32,10 @@ export function MapPicker({
   searchPlaceholder = 'Search address...',
 }: MapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapInstanceRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markerRef = useRef<any>(null);
   const searchInputId = useRef(`map-search-${Math.random().toString(36).slice(2)}`);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
@@ -92,10 +95,12 @@ export function MapPicker({
 
     const geocoder = new window.google.maps.Geocoder();
 
-    const handlePosition = (position: google.maps.LatLng) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handlePosition = (position: any) => {
       const lat = position.lat();
       const lng = position.lng();
-      geocoder.geocode({ location: position }, (results, status) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      geocoder.geocode({ location: position }, (results: any, status: any) => {
         const address = status === 'OK' && results?.[0]
           ? results[0].formatted_address
           : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
@@ -108,7 +113,7 @@ export function MapPicker({
       if (pos) handlePosition(pos);
     });
 
-    map.addListener('click', (e: google.maps.MapMouseEvent) => {
+    map.addListener('click', (e: any) => {
       if (e.latLng) {
         marker.setMap(map);
         marker.setPosition(e.latLng);
