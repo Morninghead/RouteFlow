@@ -62,11 +62,13 @@ export class DistanceCalculator {
         const distances: number[][] = [];
         const durations: number[][] = [];
 
-        response.data.rows.forEach((row) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response.data.rows.forEach((row: any) => {
           const distRow: number[] = [];
           const durRow: number[] = [];
 
-          row.elements.forEach((element) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          row.elements.forEach((element: any) => {
             if (element.status === 'OK') {
               distRow.push(element.distance.value);
               durRow.push(element.duration.value);
@@ -105,8 +107,8 @@ export class DistanceCalculator {
 
     for (let i = 0; i < origins.length; i += batchSize) {
       const originBatch = origins.slice(i, i + batchSize);
-      const distRow: number[] = [];
-      const durRow: number[] = [];
+      const distRow: number[][] = [];
+      const durRow: number[][] = [];
 
       for (let j = 0; j < destinations.length; j += batchSize) {
         const destBatch = destinations.slice(j, j + batchSize);
