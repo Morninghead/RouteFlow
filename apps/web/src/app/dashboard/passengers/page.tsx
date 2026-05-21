@@ -72,14 +72,14 @@ export default function PassengersPage() {
   async function handleDelete(id: string) {
     if (!confirm('ลบผู้โดยสารนี้?')) return;
     await supabase.from('passengers').delete().eq('id', id);
-    setPassengers(prev => prev.filter(p => p.id !== id));
+    setPassengers((prev: Passenger[]) => prev.filter((p: Passenger) => p.id !== id));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!formData.home_lat || !formData.home_lng) { setError('กรุณาเลือกที่อยู่บนแผนที่'); return; }
     setSaving(true);
-    const payload: any = { ...formData, school_id: schoolId };
+    const payload = { ...formData, school_id: schoolId };
     let err;
     if (editingId) {
       ({ error: err } = await supabase.from('passengers').update(payload).eq('id', editingId));
