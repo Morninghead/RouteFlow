@@ -8,7 +8,7 @@ CREATE INDEX IF NOT EXISTS idx_users_school_role ON users(school_id, role);
 
 -- Vehicles table indexes
 CREATE INDEX IF NOT EXISTS idx_vehicles_school_id ON vehicles(school_id);
-CREATE INDEX IF NOT EXISTS idx_vehicles_status ON vehicles(status);
+-- (no `status` column on vehicles in current schema)
 
 -- Drivers table indexes
 CREATE INDEX IF NOT EXISTS idx_drivers_school_id ON drivers(school_id);
@@ -32,13 +32,13 @@ CREATE INDEX IF NOT EXISTS idx_trips_route_id ON trips(route_id);
 CREATE INDEX IF NOT EXISTS idx_trips_driver_id ON trips(driver_id);
 CREATE INDEX IF NOT EXISTS idx_trips_vehicle_id ON trips(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_trips_status ON trips(status);
-CREATE INDEX IF NOT EXISTS idx_trips_scheduled_date ON trips(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_trips_date ON trips(date);
 
 -- Trip events table indexes
 CREATE INDEX IF NOT EXISTS idx_trip_events_trip_id ON trip_events(trip_id);
 CREATE INDEX IF NOT EXISTS idx_trip_events_stop_id ON trip_events(stop_id);
 CREATE INDEX IF NOT EXISTS idx_trip_events_passenger_id ON trip_events(passenger_id);
-CREATE INDEX IF NOT EXISTS idx_trip_events_event_type ON trip_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_trip_events_type ON trip_events(type);
 CREATE INDEX IF NOT EXISTS idx_trip_events_timestamp ON trip_events(timestamp);
 
 -- Photos table indexes
@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp);
 
 -- Notifications table indexes
 CREATE INDEX IF NOT EXISTS idx_notifications_recipient_id ON notifications(recipient_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
+CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications(status);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);
 
 -- Push subscriptions table indexes

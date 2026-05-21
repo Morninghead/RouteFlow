@@ -25,6 +25,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_sync_passenger_location ON passengers;
 CREATE TRIGGER trg_sync_passenger_location
   BEFORE INSERT OR UPDATE ON passengers
   FOR EACH ROW EXECUTE FUNCTION sync_passenger_location();
